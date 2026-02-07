@@ -6,7 +6,7 @@ export default function AnalyzePage() {
       <div className="max-w-xl mx-auto space-y-6">
         <h1 className="text-2xl font-semibold">Analyzing…</h1>
         <p className="text-gray-600">
-          Week 1: placeholder screen. Week 2–3: this will run face parsing + color metrics.
+          Running face parsing + analysis from uploaded selfie...
         </p>
 
         <div className="rounded border p-6 space-y-2">
