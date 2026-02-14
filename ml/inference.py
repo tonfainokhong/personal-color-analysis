@@ -9,7 +9,7 @@ from transformers import SegformerImageProcessor, AutoModelForSemanticSegmentati
 processor = SegformerImageProcessor.from_pretrained("jonathandinu/face-parsing")
 model = AutoModelForSemanticSegmentation.from_pretrained("jonathandinu/face-parsing")
 model.eval()
-print("id2label =", model.config.id2label)
+# print("id2label =", model.config.id2label)
 
 
 def pil_to_b64_png(img: Image.Image):
