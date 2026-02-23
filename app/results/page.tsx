@@ -1,50 +1,26 @@
-import Link from "next/link";
+"use client";
 
 export default function ResultsPage() {
+  const results = JSON.parse(sessionStorage.getItem("results") || "{}");
+  const season = results?.season;
+  const metrics = results?.metrics;
+
   return (
-    <main className="min-h-screen p-8">
-      <div className="max-w-3xl mx-auto space-y-8">
+    <main className="min-h-screen p-8 space-y-6">
+      <h1 className="text-2xl font-semibold">Your Season</h1>
+      <div className="text-xl">{season ?? "No season yet"}</div>
+
+      {metrics && (
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Your Results</h1>
-          <p className="text-gray-600">
-            [Sample Results]
-          </p>
+          <div>Value score: {metrics.value_score?.toFixed?.(3) ?? metrics.value_score}</div>
+          <div>Chroma score: {metrics.chroma_score?.toFixed?.(3) ?? metrics.chroma_score}</div>
+          <div>Undertone score: {metrics.undertone_score?.toFixed?.(3) ?? metrics.undertone_score}</div>
+
+          <pre className="p-4 border rounded bg-gray-50 overflow-auto">
+{JSON.stringify(results, null, 2)}
+          </pre>
         </div>
-
-        <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded border p-4">
-            <p className="text-sm text-gray-500">Temperature</p>
-            <p className="text-lg font-medium">Warm</p>
-          </div>
-          <div className="rounded border p-4">
-            <p className="text-sm text-gray-500">Saturation</p>
-            <p className="text-lg font-medium">High</p>
-          </div>
-          <div className="rounded border p-4">
-            <p className="text-sm text-gray-500">Brightness</p>
-            <p className="text-lg font-medium">Medium</p>
-          </div>
-        </section>
-
-        <section className="rounded border p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Recommendations</h2>
-          <ul className="list-disc pl-5 text-gray-700 space-y-1">
-            <li>Best clothing colors: gray, beige, brown</li>
-            <li>Denim wash: dark blue, black</li>
-            <li>Makeup palette: rosy neutrals</li>
-            <li>Hair color: espresso brown, brown black</li>
-          </ul>
-        </section>
-
-        <div className="flex justify-between">
-          <Link href="/" className="underline text-gray-700">
-            Home
-          </Link>
-          <Link href="/upload" className="px-4 py-2 rounded border hover:bg-gray-50">
-            Try another photo
-          </Link>
-        </div>
-      </div>
+      )}
     </main>
   );
 }

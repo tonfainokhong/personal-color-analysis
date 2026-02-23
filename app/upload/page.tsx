@@ -3,6 +3,16 @@
 import Link from "next/link";
 import { useState } from "react";
 
+
+function fileToBase64(f: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(f); // gives "data:image/...;base64,...."
+  });
+}
+
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -41,6 +51,9 @@ export default function UploadPage() {
     try {
       const form = new FormData();
       form.append("file", file);
+
+      const b64 = await fileToBase64(file);
+      sessionStorage.setItem("upload_b64", b64);
 
       const res = await fetch("http://127.0.0.1:8000/parse", {
         method: "POST",
@@ -139,10 +152,7 @@ export default function UploadPage() {
           <Link href="/" className="underline text-gray-700">
             Back
           </Link>
-          <Link
-            href="/analyze"
-            className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
-          >
+          <Link href="/analyze" className="px-4 py-2 rounded bg-black text-white hover:opacity-90">
             Continue
           </Link>
         </div>

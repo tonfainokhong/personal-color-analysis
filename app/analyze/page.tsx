@@ -1,32 +1,56 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+function dataURLToBlob(dataURL: string) {
+  const [meta, b64] = dataURL.split(",");
+  const mime = meta.match(/data:(.*);base64/)?.[1] || "image/png";
+  const bytes = atob(b64);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
 
 export default function AnalyzePage() {
+  const router = useRouter();
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const run = async () => {
+      const uploadB64 = sessionStorage.getItem("upload_b64");
+      if (!uploadB64) {
+        router.push("/upload");
+        return;
+      }
+
+      const blob = dataURLToBlob(uploadB64);
+      const form = new FormData();
+      form.append("file", blob, "selfie.png");
+
+      const res = await fetch("http://127.0.0.1:8000/analyze", {
+        method: "POST",
+        body: form,
+      });
+
+      if (!res.ok) {
+        setErr(`Backend error: ${res.status}`);
+        return;
+      }
+
+      const data = await res.json();
+      sessionStorage.setItem("results", JSON.stringify(data));
+      router.push("/results");
+    };
+
+    run();
+  }, [router]);
+
   return (
     <main className="min-h-screen p-8">
-      <div className="max-w-xl mx-auto space-y-6">
-        <h1 className="text-2xl font-semibold">Analyzing…</h1>
-        <p className="text-gray-600">
-          Running face parsing + analysis from uploaded selfie...
-        </p>
-
-        <div className="rounded border p-6 space-y-2">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-4 bg-gray-200 rounded w-2/3" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-        </div>
-
-        <div className="flex justify-between">
-          <Link href="/upload" className="underline text-gray-700">
-            Back
-          </Link>
-          <Link
-            href="/results"
-            className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
-          >
-            View results (mock)
-          </Link>
-        </div>
-      </div>
+      <h1 className="text-2xl font-semibold">Analyzing…</h1>
+      <p className="text-gray-600">Computing undertone/value/chroma and season…</p>
+      {err && <p className="text-red-600 mt-4">{err}</p>}
     </main>
   );
 }

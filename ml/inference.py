@@ -19,8 +19,9 @@ def pil_to_b64_png(img: Image.Image):
 
 
 def create_binary_mask(segmentation, label_ids):
-    mask = np.isin(segmentation, label_ids).astype(np.uint8) * 255
-    return Image.fromarray(mask)
+    mask = np.isin(segmentation, label_ids).astype(np.uint8)  # 0 or 1
+    pil_mask = Image.fromarray(mask * 255)                    # display
+    return mask, pil_mask
 
 
 def parse_face(image: Image.Image):
@@ -44,13 +45,16 @@ def parse_face(image: Image.Image):
     # segmentation map: [H, W]
     segmentation = torch.argmax(logits, dim=1)[0].cpu().numpy()
 
-    # TEMP hardcoded ids (we'll fix these after printing id2label)
-    skin_mask = create_binary_mask(segmentation, [1])
-    hair_mask = create_binary_mask(segmentation, [13])
-    lip_mask  = create_binary_mask(segmentation, [11, 12])
+    skin_mask_arr, skin_mask = create_binary_mask(segmentation, [1])
+    hair_mask_arr, hair_mask = create_binary_mask(segmentation, [13])
+    lip_mask_arr, lip_mask = create_binary_mask(segmentation, [11, 12])
 
     return {
-        "skin_mask_b64": pil_to_b64_png(skin_mask),
-        "hair_mask_b64": pil_to_b64_png(hair_mask),
-        "lip_mask_b64": pil_to_b64_png(lip_mask),
+    "skin_mask_b64": pil_to_b64_png(skin_mask),
+    "hair_mask_b64": pil_to_b64_png(hair_mask),
+    "lip_mask_b64": pil_to_b64_png(lip_mask),
+
+    # NEW: raw mask arrays (0/1)
+    "skin_mask_array": skin_mask_arr.tolist(),
+    "hair_mask_array": hair_mask_arr.tolist(),
     }
